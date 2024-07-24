@@ -1,74 +1,81 @@
-import requests
-from typing import Optional, Dict, Any
-   
-class SetURL(object):
-  def __init__(self, api_url: Optional[str] = None, portal_url: Optional[str] = None, path_uri: Optional[str] = None):
-    self._api_url = api_url
-    self._portal_url = portal_url
-    self._path_uri = path_uri
+from .url import UrlSetter   
 
-  @property
-  def api_url(self) -> Optional[str]:
-    return self._api_url
+import time
+import asyncio
+import aiohttp
+from aiohttp import ClientTimeout
+from typing import Any, Dict, Optional
 
-  @api_url.setter
-  def api_url(self, value: str) -> None:
-    self._api_url = value
+import logging
+logger = logging.getLogger(__name__)
 
-  @property
-  def portal_url(self) -> Optional[str]:
-    return self._portal_url
+class SendAPIRequest(UrlSetter):
+  param = {'pageSize': 1000}
 
-  @portal_url.setter
-  def portal_url(self, value: str) -> None:
-    self._portal_url = value
-
-  @property
-  def path_uri(self) -> Optional[str]:
-    return self._path_uri
-
-  @path_uri.setter
-  def path_uri(self, value: str) -> None:
-    self._path_uri = value
-
-  @property
-  def selected_url(self) -> str:
-    base_url = None
-
-    if self._api_url is not None: base_url = self._api_url
-    elif self._portal_url is not None: base_url = self._portal_url
-    else: raise ValueError("Need to set API url or Web portal URL!")
-
-    if self._path_uri: return f"{base_url.rstrip('/')}/{self._path_uri.lstrip('/')}"
-
-    return base_url
-  
-class SendAPIRequest(SetURL):
-
-  param = { 'pageSize' : 100 }
-
-  def __init__(self, api_url=None, path_uri=None, base64_token=None):
-    super().__init__(api_url, path_uri)
-    self.path_uri = path_uri
+  def __init__(self, api_url=None, base64_token=None, rate_limit_per_second=5):
+    super().__init__(api_url)
     self._base64_token = base64_token
-    
+    self.rate_limit_per_second = rate_limit_per_second
+    self.semaphore = asyncio.Semaphore(rate_limit_per_second)
+    self.headers = {
+      'Authorization': f'Basic {self._base64_token}' if self._base64_token else None,
+      'Content-Type': 'application/json'
+    }
+    self.session = None
+    self._last_request_time = 0
+
   @property
   def base64_token(self):
     return self._base64_token
-  
+
   @base64_token.setter
-  def base64_token(self, value):
+  def base64_token(self, value: str):
     self._base64_token = value
+    self.headers['Authorization'] = f'Basic {value}' if value else None
 
-  def get(self, param: Optional[Dict[str, Any]] = None) -> Any:
-    if param is None: param = SendAPIRequest.param
-    if self._base64_token is not None:
-      headers = {
-        'Authorization': f'Basic {self._base64_token}',
-        'Content-Type': 'application/json'
-      }
-    else: raise ValueError("Need to set username:password as base64 format!")
+  async def _rate_limit(self):
+   async with self.semaphore:
+      current_time = time.monotonic()
+      elapsed = current_time - self._last_request_time
+      wait_time = max(0, (1 / self.rate_limit_per_second) - elapsed)
+      if wait_time > 0:
+          await asyncio.sleep(wait_time)
+      self._last_request_time = time.monotonic()
 
-    response = requests.get(self.selected_url, params=param, headers=headers)
-    response.raise_for_status()
-    return response.json()
+  async def get(self, custom_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None) -> Any:
+    if params is None:
+      params = SendAPIRequest.param
+    if custom_uri:
+      self.path_uri = custom_uri
+
+    url = self.selected_url
+
+    if self.session is None:
+      self.session = aiohttp.ClientSession(headers=self.headers)
+
+    await self._rate_limit()
+
+    for attempt in range(3):
+      try:
+        async with self.session.get(url, params=params, timeout=ClientTimeout(total=30)) as response:
+          response.raise_for_status()
+          return await response.json()
+      except aiohttp.ClientError as e:
+        logger.error(f"Error fetching {url}: {e} - Params: {params}")
+        if attempt < 2:
+          await asyncio.sleep(2 ** attempt)
+        else:
+          return None
+
+  async def close_session(self):
+    if self.session is not None:
+      await self.session.close()
+      self.session = None
+
+  async def __aenter__(self):
+    if self.session is None:
+      self.session = aiohttp.ClientSession(headers=self.headers)
+    return self
+
+  async def __aexit__(self, exc_type, exc_val, exc_tb):
+    await self.close_session()

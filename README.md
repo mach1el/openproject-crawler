@@ -4,12 +4,12 @@
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Selenium](https://img.shields.io/badge/-selenium-%43B02A?style=for-the-badge&logo=selenium&logoColor=white)
 
-This tool supports collecting data from OpenProject, forcing users to use the available API of OpenProject and additional Web Selenium for scraping more data, which the API doesn't support.
+This tool supports collecting data from OpenProject, forcing users to use the available API of OpenProject and additional Web Selenium for scraping more data, which the API doesn't support. Scraping processes are using asynchronous programming to make it faster and stable.
 
 ## Installation
 
 To install the required dependencies, use:
-```
+```bash
 pip install -r requirements.txt
 ```
 
@@ -22,17 +22,38 @@ pip install -r requirements.txt
 
 ## Example to use
 
-```
-from openproject_crawler.api_crawl import CrawlProject
-from openproject_crawler.credential import SetCredential
+For example, to use this module, I provide a script named [utils.py](/src/python/utils.py) to scrape data from a specific project. This will use the asynchronous method, execpt `DataParser`; it will use [ThreadPool](https://docs.python.org/3/library/concurrent.futures.html) instead. Hence, you need to setup it in an asynchronous way with *`async/await`* syntax. Give some explanation.
 
-credential = SetCredential("apikey", "a6a2081fd40e89612e0d362753d3cf843974cfde7c67821c03b9c158dfc138d1")
-project_crawler = CrawlProject(api_url="https://openproject.mich43l.io/api/v3", base64_token=credential.base64_token)
-print(project_crawler.total()) #Get total projects available
-print(project_crawler.get_project_id()) #Get dict of project's identifier and its ID
+- *`Crawler`* class where to init crawler and get data such project's ID, project's tasks ID, tasks's activities
+  - function `get_projects_id` -> Get all projects available and its ID
+  - function `get_tasks_id` -> Get all tasks that belong to project `"my_project"` with filters parameters in HTTP request
+  - function `get_tasks_activities` -> Scrape data from `work_packages/{id}`
+
+- *`Parser`* This will return a dict format and it containt the infor of every tasks that we already scraped in `get_tasks_activities`
+
+Data structure:
+```json
+{
+  "Task name": "Scraping data from openproject",
+  "Task info": {
+    "Project": "Data collection",
+    "ID": "2",
+    "Type": "Task",
+    "Priority": "Normal",
+    "Create date": "2024-06-09 15:12:26",
+    "End Date": "2024-06-19 16:44:31",
+    "Duration": "10 days"
+  },
+  "Task activities": [
+    {
+      "Datetime": "2024-06-19 16:44:31",
+      "Action": [
+        "Status changed from In progress to Closed"
+      ]
+    }
+  ]
+}
 ```
-1. Set the credential for the API
-2. The API request use `Basic Authorization` so we set the credential as base64 token
 
 ## License
 ![GitHub License](https://img.shields.io/github/license/mach1el/openproject-crawler?style=flat-square&color=%23FF5E0E)
