@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"openproject-crawler/internal/credential"
-	crawlprojects "openproject-crawler/pkg/projectscrawler"
+
+	// pjcrawler "openproject-crawler/pkg/projectscrawler"
+	"openproject-crawler/pkg/wpcrawler"
 )
 
 func main() {
@@ -15,14 +18,40 @@ func main() {
 	}
 	base64Token := cred.GenerateToken()
 
-	crawlProjects, err := crawlprojects.NewProjectCrawler(apiURL, base64Token)
+	crawler, err := wpcrawler.NewWPCrawler(apiURL, base64Token, "")
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 
-	projectIDs, err := crawlProjects.GetProjectIDs()
+	// crawler.SetProjectName("vi")
+	params := make(map[string]interface{})
+	filter := []map[string]interface{}{
+		{
+			"project": map[string]interface{}{
+				"operator": "=",
+				"values":   []string{"3"},
+			},
+		},
+	}
+	filterJSON, _ := json.Marshal(filter)
+	params["pageSize"] = "1000"
+	params["filters"] = string(filterJSON)
+
+	// crawler.SetParams(params)
+	tasksAttr, err := crawler.GetTasksAttrAsync()
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
-	fmt.Println("Project IDs and Identifiers:", projectIDs)
+	fmt.Println(tasksAttr)
+
+	// pjcrawler, err := pjcrawler.NewProjectCrawler(apiURL, base64Token)
+	// if err != nil {
+	// 	log.Fatalf("Error: %v", err)
+	// }
+
+	// projectIDs, err := pjcrawler.GetProjectIDs()
+	// if err != nil {
+	// 	log.Fatalf("Error: %v", err)
+	// }
+	// fmt.Println("Project IDs and Identifiers:", projectIDs)
 }
