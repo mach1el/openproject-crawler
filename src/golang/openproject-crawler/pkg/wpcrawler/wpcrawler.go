@@ -138,21 +138,24 @@ func (wpc *WPCrawler) GetTasksIDAsync() ([]int, error) {
 	return ids, nil
 }
 
-func (wpc *WPCrawler) GetTasksAttrAsync() (map[string]interface{}, error) {
+func (wpc *WPCrawler) GetTasksAttrAsync() ([]map[string]interface{}, error) {
 	err := wpc.FetchDataAsync()
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(wpc.data)
-	result := make(map[string]interface{})
+	var result []map[string]interface{}
+	tasksMap := make(map[string]interface{})
 	wpc.mu.Lock()
 	for _, val := range wpc.data {
-		// valChild := val["_links"].(map[string]interface{})
-		result["taskName"] = val["subject"]
-		result["taskAttr"] = map[string]interface{}{
-			"id": val["id"],
-			// "type" : valChild["type"]["title"],
+		valChild := val["_links"].(map[string]interface{})
+		tasksMap["taskName"] = val["subject"]
+		tasksMap["taskAttr"] = map[string]interface{}{
+			"id":       val["id"],
+			"type":     valChild["type"].(map[string]interface{})["title"].(string),
+			"priority": valChild["priority"].(map[string]interface{})["title"].(string),
+			"status":   valChild["status"].(map[string]interface{})["title"].(string),
 		}
+		result = append(result, tasksMap)
 	}
 	wpc.mu.Unlock()
 	return result, nil

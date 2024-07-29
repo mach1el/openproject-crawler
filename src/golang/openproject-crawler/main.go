@@ -42,7 +42,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
-	fmt.Println(tasksAttr)
+	for _, val := range tasksAttr {
+		fmt.Println(val)
+	}
+	// fmt.Println(tasksAttr)
 
 	// pjcrawler, err := pjcrawler.NewProjectCrawler(apiURL, base64Token)
 	// if err != nil {
