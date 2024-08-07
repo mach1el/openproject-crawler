@@ -20,16 +20,46 @@ pip install -r requirements.txt
 - *`api_url`*: The value should be `https://myopenproject.example/api/v3` (endswith `/api/v3`)
 - *`portal_url`*: The value should be `https://myopenproject.example` (no need any uri path)
 
-## Example to use
+## Example to use (Python)
 
-For example, to use this module, I provide a script named [utils.py](/src/python/utils.py) to scrape data from a specific project. This will use the asynchronous method, execpt `DataParser`; it will use [ThreadPool](https://docs.python.org/3/library/concurrent.futures.html) instead. Hence, you need to setup it in an asynchronous way with *`async/await`* syntax. Give some explanation.
+For example, to use this module, I provide a script named [utils.py](src/python/sample/utils.py) to scrape data from a specific project. This will use the asynchronous method, execpt `DataParser`; it will use [ThreadPool](https://docs.python.org/3/library/concurrent.futures.html) instead. Hence, you need to setup it in an asynchronous way with *`async/await`* syntax. Give some explanation.
 
 - *`Crawler`* class where to init crawler and get data such project's ID, project's tasks ID, tasks's activities
   - function `get_projects_id` -> Get all projects available and its ID
   - function `get_tasks_id` -> Get all tasks that belong to project `"my_project"` with filters parameters in HTTP request
-  - function `get_tasks_activities` -> Scrape data from `work_packages/{id}`
+  - function `get_tasks_activities_data` -> Scrape data from `work_packages/{id}`
 
-- *`Parser`* This will return a dict format and it containt the infor of every tasks that we already scraped in `get_tasks_activities`
+### Setup Python venv to use the tool
+
+* Navigate to the project source: 
+
+```bash
+cd /path/to/openproject-crawler/src/python/openproject_crawler
+```
+
+* Create a virutal environment:
+
+```bash
+python -m venv venv
+```
+
+* Active environment
+
+  + `On Windows`
+
+      ```
+      .\venv\Scripts\activate
+      ```
+  + `Unix or MacOS`
+
+      ```bash
+      source venv/bin/activate
+      ```
+* Install the required dependencies:
+
+```bash
+pip install -e .
+```
 
 Data structure:
 ```json

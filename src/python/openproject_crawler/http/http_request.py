@@ -1,13 +1,11 @@
-from .url import UrlSetter   
+from openproject_crawler.config.logging import logger
+from openproject_crawler.core.url import UrlSetter
 
 import time
 import asyncio
 import aiohttp
 from aiohttp import ClientTimeout
 from typing import Any, Dict, Optional
-
-import logging
-logger = logging.getLogger(__name__)
 
 class SendAPIRequest(UrlSetter):
   param = {'pageSize': 1000}
@@ -42,7 +40,7 @@ class SendAPIRequest(UrlSetter):
           await asyncio.sleep(wait_time)
       self._last_request_time = time.monotonic()
 
-  async def get(self, custom_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None) -> Any:
+  async def send_get_request(self, custom_uri: Optional[str] = None, params: Optional[Dict[str, Any]] = None) -> Any:
     if params is None:
       params = SendAPIRequest.param
     if custom_uri:

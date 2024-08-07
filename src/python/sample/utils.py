@@ -1,22 +1,16 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 import json
 import asyncio
 from typing import Any, Dict
-from openproject_crawler import (
+from openproject_crawler.config import SetCredential
+from openproject_crawler.models import (
   CrawlProjects,
   CrawlWorkPackages,
   CrawlActivities
 )
-from openproject_crawler import SetCredential
-from openproject_crawler import DataParser
 
 class Crawler(object):
   def __init__(self):
-    self.url = "https://myoproject.com/api/v3"
+    self.url = "https://openproject.example.com/api/v3"
     self.credential = SetCredential("apikey", "a6a2081fd40e89612e0d362753d3cf843974cfde7c67821c03b9c851dfc1")
     self.base64_token = self.credential.base64_token
 
@@ -45,33 +39,22 @@ class Crawler(object):
     
     return await crawler.get_tasks_id()
   
-  async def get_tasks_activities(self):
+  async def get_tasks_activities_data(self):
     crawler = CrawlActivities(api_url=self.url, base64_token=self.base64_token)
     crawler.tasks_id = await self.get_tasks_id(project_name="viclass")
-    data = await crawler.get_full_attributes()
+    data = await crawler.get_tasks_activities()
     return data
-
-class Parser(DataParser):
-  def __init__(self, crawler):
-    super().__init__()
-    self.crawler = crawler
-
-  def generate_data(self):
-    loop = asyncio.get_event_loop()
-    if loop.is_running():
-      future = asyncio.ensure_future(self.crawler.get_tasks_activities())
-      loop.run_until_complete(future)
-      data = future.result()
-    else:
-      data = loop.run_until_complete(self.crawler.get_tasks_activities())
-    
-    self.data_input = data
-    return self.merge_data()
 
 def main():
   crawler = Crawler()
-  parser = Parser(crawler)
-  print(parser.generate_data())
+  loop = asyncio.get_event_loop()
+  if loop.is_running():
+    future = asyncio.ensure_future(crawler.get_tasks_activities_data())
+    loop.run_until_complete(future)
+    data = future.result()
+  else:
+    data = loop.run_until_complete(crawler.get_tasks_activities_data())
+  print(data)
 
 if __name__ == "__main__":
   main()
