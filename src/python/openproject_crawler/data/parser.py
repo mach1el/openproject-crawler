@@ -1,11 +1,10 @@
+from openproject_crawler.config.logging import logger
+
 import os
-import logging
 import traceback
 
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
-logger = logging.getLogger(__name__)
 
 class DataParser(object):
   def __init__(self, data_input=None):
