@@ -1,6 +1,7 @@
 # openproject-crawler
 
 ![OpenProject](https://img.shields.io/badge/OpenProject-2D8CFF?style=for-the-badge&logo=openproject&logoColor=white)
+![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Selenium](https://img.shields.io/badge/-selenium-%43B02A?style=for-the-badge&logo=selenium&logoColor=white)
 
@@ -61,7 +62,42 @@ python -m venv venv
 pip install -e .
 ```
 
-Data structure:
+## Example to use (GoLang)
+
+Given detail usage on [main.go](src/golang/openproject-crawler/cmd/main.go) as same as Python process, the flow is
+
+`Get projects ID` -> `Get tasks ID of specific project` -> `Get tasks activities of specific project`
+
+```bash
+go run main.go
+```
+
+# Data structure
+
+* Projects ID:
+```json
+{
+  "1" : "mainproject",
+  "2" : "demoproject"
+}
+```
+
+* Tasks ID:
+
+  * Golang data:
+
+    ```go
+    [45 278 13 225]
+    ```
+
+  * Python data:
+
+    ```python
+    [45, 278, 13, 225]
+    ```
+
+* Tasks activities:
+
 ```json
 {
   "Task name": "Scraping data from openproject",
