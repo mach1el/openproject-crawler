@@ -1,5 +1,5 @@
-from openproject_crawler.config.logging import logger
-from openproject_crawler.core.url import UrlSetter
+from openproject_crawler.config import logger
+from openproject_crawler.core import UrlSetter
 
 import time
 import asyncio

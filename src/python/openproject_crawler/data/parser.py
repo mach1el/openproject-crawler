@@ -1,4 +1,4 @@
-from openproject_crawler.config.logging import logger
+from openproject_crawler.config import logger
 
 import os
 import traceback

@@ -35,7 +35,7 @@ For example, to use this module, I provide a script named [utils.py](src/python/
 * Navigate to the project source: 
 
 ```bash
-cd /path/to/openproject-crawler/src/python/openproject_crawler
+cd /path/to/openproject-crawler/src/python
 ```
 
 * Create a virutal environment:
