@@ -1,5 +1,5 @@
-from openproject_crawler.config.logging import logger
-from openproject_crawler.http.http_request import SendAPIRequest
+from openproject_crawler.config import logger
+from openproject_crawler.http import SendAPIRequest
 
 import asyncio
 import aiohttp

@@ -2,13 +2,12 @@ import os
 import sys
 import unittest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from openproject_crawler.http_request import SetURL
+from openproject_crawler.core import UrlSetter
 
 class TestSetURL(unittest.TestCase):
   def setUp(self):
-    self.url_instance = SetURL()
+    self.url_instance = UrlSetter()
 
   def test_api_url(self):
     self.url_instance.api_url = "https://api.example.com"

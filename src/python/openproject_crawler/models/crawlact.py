@@ -1,6 +1,6 @@
-from openproject_crawler.config.logging import logger
-from openproject_crawler.http.http_request import SendAPIRequest
-from openproject_crawler.data.parser import DataParser
+from openproject_crawler.config import logger
+from openproject_crawler.http import SendAPIRequest
+from openproject_crawler.data import DataParser
 
 import asyncio
 import functools

@@ -3,9 +3,7 @@ import sys
 import base64
 import unittest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from openproject_crawler.credential import SetCredential
+from openproject_crawler.config import SetCredential
 
 class TestSetCredential(unittest.TestCase):
   def test_initialization(self):
